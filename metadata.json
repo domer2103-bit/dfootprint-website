@@ -1,0 +1,8 @@
+{
+  "name": "DFootprint AI Agency",
+  "description": "A high-end AI agency website for Dominik Wierzchowski, featuring strategic automation, visual packages, and intelligent business scaling solutions.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
