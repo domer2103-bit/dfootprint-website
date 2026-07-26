@@ -43,11 +43,11 @@
   <section class="band band--light">
     <div class="container">
       <!--
-        Founder note: this form has no backend connected yet. Before it goes live,
-        wire the action below to your chosen form handler (e.g. an n8n webhook or
-        a form service compatible with Hostinger), or it won't send anywhere.
+        Founder note: this form posts as JSON to the n8n webhook at
+        https://n8n.srv1179774.hstgr.cloud/webhook/contact-form via
+        assets/js/contact.js. If that webhook URL ever changes, update it there.
       -->
-      <form class="contact-form" method="POST" action="#">
+      <form class="contact-form" id="contact-form" method="POST" action="https://n8n.srv1179774.hstgr.cloud/webhook/contact-form">
         <input type="hidden" name="source_page" value="contact">
 
         <div class="form-field">
@@ -56,8 +56,8 @@
         </div>
 
         <div class="form-field">
-          <label for="business">Business name</label>
-          <input type="text" id="business" name="business" autocomplete="organization" required>
+          <label for="business_name">Business name</label>
+          <input type="text" id="business_name" name="business_name" autocomplete="organization" required>
         </div>
 
         <div class="form-field">
@@ -82,6 +82,8 @@
 
         <button class="btn btn-primary form-submit" type="submit">Send</button>
       </form>
+
+      <p class="form-status" id="form-status" role="status" aria-live="polite" hidden></p>
     </div>
   </section>
 
@@ -113,5 +115,6 @@
 </footer>
 
 <script src="assets/js/main.js"></script>
+<script src="assets/js/contact.js"></script>
 </body>
 </html>
