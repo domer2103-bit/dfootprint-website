@@ -32,10 +32,25 @@ document.addEventListener("DOMContentLoaded", function () {
       submitButton.textContent = "Sending…";
     }
 
+    // Sent as application/x-www-form-urlencoded (not JSON) deliberately —
+    // this is a CORS "simple request", so the browser sends it directly
+    // without a preflight OPTIONS check first. n8n's webhook node parses
+    // this into $json.body exactly the same way it parses JSON, so nothing
+    // downstream needs to change. Sending as JSON with a custom
+    // Content-Type header forces a preflight, and if that preflight isn't
+    // answered correctly, the browser silently blocks the whole submission
+    // — which is almost certainly why the form looked "not connected to
+    // anything" even though the n8n workflow itself works fine.
+    var encoded = Object.keys(payload)
+      .map(function (key) {
+        return encodeURIComponent(key) + "=" + encodeURIComponent(payload[key]);
+      })
+      .join("&");
+
     fetch(WEBHOOK_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: encoded
     })
       .then(function (response) {
         if (!response.ok) {
