@@ -9,14 +9,6 @@ document.addEventListener("DOMContentLoaded", function () {
   var WEBHOOK_URL = "https://n8n.srv1179774.hstgr.cloud/webhook/contact-form";
   var submitButton = form.querySelector(".form-submit");
 
-  // If a page links here with e.g. contact.html?source=missed-calls (the
-  // Quick Assessment page does this), use that as source_page instead of
-  // the "contact" default already set on the hidden field in the markup.
-  var sourceParam = new URLSearchParams(window.location.search).get("source");
-  if (sourceParam) {
-    form.source_page.value = sourceParam;
-  }
-
   function showStatus(message, isError) {
     status.textContent = message;
     status.hidden = false;
@@ -40,15 +32,6 @@ document.addEventListener("DOMContentLoaded", function () {
       submitButton.textContent = "Sending…";
     }
 
-    // Sent as application/x-www-form-urlencoded (not JSON) deliberately —
-    // this is a CORS "simple request", so the browser sends it directly
-    // without a preflight OPTIONS check first. n8n's webhook node parses
-    // this into $json.body exactly the same way it parses JSON, so nothing
-    // downstream needs to change. Sending as JSON with a custom
-    // Content-Type header forces a preflight, and if that preflight isn't
-    // answered correctly, the browser silently blocks the whole submission
-    // — which is almost certainly why the form looked "not connected to
-    // anything" even though the n8n workflow itself works fine.
     var encoded = Object.keys(payload)
       .map(function (key) {
         return encodeURIComponent(key) + "=" + encodeURIComponent(payload[key]);
