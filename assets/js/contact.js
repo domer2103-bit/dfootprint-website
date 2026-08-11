@@ -9,6 +9,14 @@ document.addEventListener("DOMContentLoaded", function () {
   var WEBHOOK_URL = "https://n8n.srv1179774.hstgr.cloud/webhook/contact-form";
   var submitButton = form.querySelector(".form-submit");
 
+  // If a page links here with e.g. contact.html?source=missed-calls (the
+  // Quick Assessment page does this), use that as source_page instead of
+  // the "contact" default already set on the hidden field in the markup.
+  var sourceParam = new URLSearchParams(window.location.search).get("source");
+  if (sourceParam) {
+    form.source_page.value = sourceParam;
+  }
+
   function showStatus(message, isError) {
     status.textContent = message;
     status.hidden = false;
