@@ -670,6 +670,21 @@ textarea {
   object-fit: cover;
 }
 
+/* The hero video/images are shot portrait (phone-in-hand style). On a
+   narrow viewport that's close to the source's own aspect ratio, so
+   object-fit: cover fills the screen with only a light crop. On a wide
+   desktop viewport, cover would force the same portrait footage to scale
+   up 3x+ to fill the width — cropping out most of the frame and leaving
+   only a heavily zoomed-in sliver visible. Past the point where the site's
+   own layout switches to its desktop breakpoint, switch to contain instead
+   so the whole shot stays visible, letterboxed by the gradient behind it. */
+@media (min-width: 760px) {
+  .scroll-hero video,
+  .scroll-hero canvas {
+    object-fit: contain;
+  }
+}
+
 .scroll-hero-sticky::after {
   content: "";
   position: absolute;

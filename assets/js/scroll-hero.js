@@ -28,11 +28,38 @@ document.addEventListener("DOMContentLoaded", function () {
 
   var ready = false;
   var ticking = false;
+  var primed = false;
+
+  // iOS Safari (and some other mobile browsers) won't render a new frame
+  // when you seek a <video> that has never actually played — the element
+  // loads, metadata is available, currentTime can be set, but the picture
+  // on screen just never updates. Playing it once and immediately pausing
+  // gets it into a state where seeking works, without the visitor ever
+  // seeing it actually play. Muted + playsinline (both already set on the
+  // element) is what makes this allowed without a user tap first.
+  function primeForSeeking() {
+    if (primed) {
+      return;
+    }
+    primed = true;
+    var playResult = video.play();
+    if (playResult && typeof playResult.then === "function") {
+      playResult.then(function () {
+        video.pause();
+      }).catch(function () {
+        // Autoplay blocked for some reason — scroll-scrubbing may not
+        // render on this browser, but the poster frame still shows.
+      });
+    } else {
+      video.pause();
+    }
+  }
 
   video.addEventListener("loadedmetadata", function () {
     if (video.duration && isFinite(video.duration)) {
       ready = true;
       video.classList.add("is-ready");
+      primeForSeeking();
     }
   });
 
