@@ -687,72 +687,38 @@ textarea {
   margin-right: auto;
 }
 
-/* The stage holds the isolated phone image and its notification bubble.
-   assets/js/scroll-hero.js sets the phone's transform/opacity and the
-   notification's transform/opacity directly as scroll progresses through
-   the hero — these rules are just the resting (fully-settled) state, which
-   is also exactly what shows for prefers-reduced-motion visitors and
-   anyone whose JS hasn't run yet, so the hero always looks complete even
-   with no animation at all. */
-.scroll-hero-stage {
+/* The frame holds the workshop video, contained and centered rather than
+   stretched full-bleed across the viewport — sized to match the source
+   footage's own aspect ratio per breakpoint (portrait on mobile, landscape
+   on desktop — see the two <source media="..."> in the markup) so
+   object-fit: cover never needs to crop out most of the shot the way a
+   full-bleed box forced onto mismatched footage did before. The poster
+   attribute shows natively before any JS runs, so there's no separate
+   loading/fade-in state to manage — same reasoning as why a missing/failed
+   asset just quietly falls back to the plain gradient behind it. */
+.scroll-hero-frame {
   position: relative;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  width: min(85vw, 380px);
+  aspect-ratio: 9 / 16;
+  max-height: 55vh;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
 }
 
-.scroll-hero-phone {
-  max-height: 30vh;
-  width: auto;
-  filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.35));
-  transform-origin: 50% 85%;
+.scroll-hero-frame video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 @media (min-width: 760px) {
-  /* On desktop the notification sits beside the phone rather than below
-     it, so there's more headroom to let the phone itself be a bit bigger. */
-  .scroll-hero-phone {
-    max-height: 42vh;
+  .scroll-hero-frame {
+    width: min(70vw, 640px);
+    aspect-ratio: 16 / 9;
   }
-}
-
-.scroll-hero-notification {
-  /* Overlaps the top of the phone like a real incoming-notification
-     banner, rather than sitting beside or below it — that way it never
-     needs extra vertical or horizontal room of its own, so it can't push
-     the hero taller than the viewport on any breakpoint. JS only ever
-     sets --notif-y (the slide-in offset); the centering transform below
-     stays untouched since it's composed in, not overwritten. */
-  --notif-y: -14px;
-  position: absolute;
-  top: 6%;
-  left: 50%;
-  width: min(88vw, 19rem);
-  transform: translateX(-50%) translateY(var(--notif-y));
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  background: var(--color-white);
-  color: var(--color-ink);
-  border-radius: 10px;
-  padding: 0.75rem 0.9rem;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
-  font-size: 0.8rem;
-  line-height: 1.35;
-  text-align: left;
-}
-
-.scroll-hero-notification-check {
-  flex-shrink: 0;
-  width: 1.4rem;
-  height: 1.4rem;
-  border-radius: 50%;
-  background: var(--color-accent);
-  color: var(--color-white);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
 }
 
 @media (prefers-reduced-motion: reduce) {

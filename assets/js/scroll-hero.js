@@ -1,24 +1,30 @@
-// Drives the hero's phone + notification bubble from scroll position
-// instead of time, so the little "missed call -> auto-reply sent" story
-// plays out as you scroll down (and reverses if you scroll back up).
+// Drives a <video> element's playback position from scroll position instead
+// of time, so the hero plays like a story that unfolds as you scroll down
+// (and reverses if you scroll back up) rather than an autoplaying clip.
 //
-// Pure CSS transform/opacity, no video — deliberately, since video can't
-// have a transparent background and scroll-scrubbing a <video> turned out
-// to be unreliable in production (mobile playback issues, desktop
-// sizing). Transforms on an image have none of that: no loading/seeking/
-// codec concerns, works identically everywhere.
-//
-// Ships safe by default: if the phone image is missing, or the visitor
-// has prefers-reduced-motion set, this does nothing — the CSS resting
-// state in style.css already shows everything fully visible and settled,
-// so the hero still looks complete either way.
+// Ships safe by default: if there's no video source, if it fails to load,
+// or if the visitor has prefers-reduced-motion set, this does nothing and
+// the <video poster> (which shows natively with no JS needed at all) stays
+// put as a plain static image — the section still reads fine either way.
 document.addEventListener("DOMContentLoaded", function () {
   var hero = document.getElementById("scroll-hero");
-  var phone = document.getElementById("hero-phone");
-  var notification = document.getElementById("hero-notification");
+  var video = document.getElementById("hero-scrub-video");
 
-  if (!hero || !phone || !notification) {
+  if (!hero || !video) {
     return;
+  }
+
+  // <video poster> has no native responsive equivalent to <source media="">,
+  // so pick the matching poster by hand. This runs even for
+  // prefers-reduced-motion visitors, since the poster is the only thing
+  // they'll ever see.
+  var isDesktopWidth = window.matchMedia("(min-width: 760px)").matches;
+  var desktopPoster = video.getAttribute("data-poster-desktop");
+  var mobilePoster = video.getAttribute("data-poster-mobile");
+  if (isDesktopWidth && desktopPoster) {
+    video.setAttribute("poster", desktopPoster);
+  } else if (mobilePoster) {
+    video.setAttribute("poster", mobilePoster);
   }
 
   var prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -26,14 +32,58 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
-  var ticking = false;
-
-  function clamp01(n) {
-    return Math.max(0, Math.min(1, n));
+  // No <source> given yet (asset not generated/dropped in), or the browser
+  // couldn't load it — leave the poster showing.
+  var hasSource = video.querySelector("source[src]");
+  if (!hasSource) {
+    return;
   }
+
+  var ready = false;
+  var ticking = false;
+  var primed = false;
+
+  // iOS Safari (and some other mobile browsers) won't render a new frame
+  // when you seek a <video> that has never actually played — the element
+  // loads, metadata is available, currentTime can be set, but the picture
+  // on screen just never updates. Playing it once and immediately pausing
+  // gets it into a state where seeking works, without the visitor ever
+  // seeing it actually play. Muted + playsinline (both already set on the
+  // element) is what makes this allowed without a user tap first.
+  function primeForSeeking() {
+    if (primed) {
+      return;
+    }
+    primed = true;
+    var playResult = video.play();
+    if (playResult && typeof playResult.then === "function") {
+      playResult.then(function () {
+        video.pause();
+      }).catch(function () {
+        // Autoplay blocked for some reason — scroll-scrubbing may not
+        // render on this browser, but the poster frame still shows.
+      });
+    } else {
+      video.pause();
+    }
+  }
+
+  video.addEventListener("loadedmetadata", function () {
+    if (video.duration && isFinite(video.duration)) {
+      ready = true;
+      primeForSeeking();
+    }
+  });
+
+  video.addEventListener("error", function () {
+    ready = false;
+  });
 
   function updateFrame() {
     ticking = false;
+    if (!ready) {
+      return;
+    }
 
     var rect = hero.getBoundingClientRect();
     var scrollableDistance = hero.offsetHeight - window.innerHeight;
@@ -42,30 +92,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     var scrolledIntoHero = -rect.top;
-    var fraction = clamp01(scrolledIntoHero / scrollableDistance);
+    var fraction = scrolledIntoHero / scrollableDistance;
+    fraction = Math.max(0, Math.min(1, fraction));
 
-    // Stage 1 (0 -> 0.4 of the hero's scroll range): the phone settles
-    // into place — starts slightly small and tilted like it just started
-    // ringing, scales/straightens up as you scroll.
-    var phoneProgress = clamp01(fraction / 0.4);
-    var scale = 0.85 + phoneProgress * 0.15;
-    var rotation = -8 + phoneProgress * 8;
-    var phoneOpacity = 0.5 + phoneProgress * 0.5;
-    phone.style.transform = "scale(" + scale + ") rotate(" + rotation + "deg)";
-    phone.style.opacity = String(phoneOpacity);
-
-    // Stage 2 (0.4 -> 0.75): once the phone's settled, the auto-reply
-    // notification fades in and slides down into its resting position
-    // over the top of the phone, like a real notification banner
-    // dropping in. Sets the --notif-y custom property only, never
-    // `transform` directly — the CSS rule for .scroll-hero-notification
-    // composes it with its own horizontal-centering transform, and
-    // setting `transform` here would silently override that centering
-    // with an inline style, since inline styles always win over
-    // stylesheet rules.
-    var notifProgress = clamp01((fraction - 0.4) / 0.35);
-    notification.style.opacity = String(notifProgress);
-    notification.style.setProperty("--notif-y", (-14 + notifProgress * 14) + "px");
+    video.currentTime = fraction * video.duration;
   }
 
   function onScroll() {
@@ -74,11 +104,6 @@ document.addEventListener("DOMContentLoaded", function () {
       ticking = true;
     }
   }
-
-  // Set the starting state immediately (fraction 0) rather than waiting
-  // for the first scroll event, so it doesn't flash the CSS resting state
-  // before JS takes over.
-  updateFrame();
 
   window.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", onScroll);
