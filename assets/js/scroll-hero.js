@@ -14,6 +14,19 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
+  // <video poster> has no native responsive equivalent to <source media="">,
+  // so pick the matching poster by hand. This runs even for
+  // prefers-reduced-motion visitors, since the poster is the only thing
+  // they'll ever see.
+  var isDesktopWidth = window.matchMedia("(min-width: 760px)").matches;
+  var desktopPoster = video.getAttribute("data-poster-desktop");
+  var mobilePoster = video.getAttribute("data-poster-mobile");
+  if (isDesktopWidth && desktopPoster) {
+    video.setAttribute("poster", desktopPoster);
+  } else if (mobilePoster) {
+    video.setAttribute("poster", mobilePoster);
+  }
+
   var prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (prefersReducedMotion) {
     return;

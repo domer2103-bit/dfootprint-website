@@ -33,7 +33,10 @@
   <section class="scroll-hero" id="scroll-hero" aria-label="A missed call on a garage workbench turning into a full diary">
     <div class="scroll-hero-sticky">
       <video id="hero-scrub-video" muted playsinline preload="auto"
+             data-poster-mobile="assets/images/automation-garage-hero-poster.png"
+             data-poster-desktop="assets/images/automation-garage-hero-poster-desktop.png"
              poster="assets/images/automation-garage-hero-poster.png">
+        <source src="assets/video/automation-garage-hero-desktop.mp4" type="video/mp4" media="(min-width: 760px)">
         <source src="assets/video/automation-garage-hero.mp4" type="video/mp4">
       </video>
       <canvas id="hero-scrub-canvas" aria-hidden="true" hidden></canvas>
