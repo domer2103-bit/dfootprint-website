@@ -30,20 +30,19 @@
 
 <main id="main">
 
-  <section class="scroll-hero" id="scroll-hero" aria-label="A missed call on a garage workbench turning into a full diary">
+  <section class="scroll-hero" id="scroll-hero" aria-label="A phone ringing, then an automatic reply confirming it's been handled">
     <div class="scroll-hero-sticky">
-      <video id="hero-scrub-video" muted playsinline preload="auto"
-             data-poster-mobile="assets/images/automation-garage-hero-poster.png"
-             data-poster-desktop="assets/images/automation-garage-hero-poster-desktop.png"
-             poster="assets/images/automation-garage-hero-poster.png">
-        <source src="assets/video/automation-garage-hero-desktop.mp4" type="video/mp4" media="(min-width: 760px)">
-        <source src="assets/video/automation-garage-hero.mp4" type="video/mp4">
-      </video>
-      <canvas id="hero-scrub-canvas" aria-hidden="true" hidden></canvas>
       <div class="container scroll-hero-content">
         <p class="eyebrow">For MOT Garages &amp; Independent Mechanics</p>
         <h1>Every unanswered call is a car going to the garage down the road.</h1>
         <p>Five small automations that quietly keep your diary full — without you doing anything different.</p>
+      </div>
+      <div class="scroll-hero-stage">
+        <img id="hero-phone" class="scroll-hero-phone" src="assets/images/automation-garage-phone.png" alt="A phone ringing with an incoming call">
+        <div id="hero-notification" class="scroll-hero-notification">
+          <span class="scroll-hero-notification-check">✓</span>
+          <span>Auto-reply sent</span>
+        </div>
       </div>
     </div>
   </section>
