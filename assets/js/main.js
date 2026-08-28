@@ -9,6 +9,38 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  // "Systems" nav dropdown(s) — click/keyboard-toggle rather than hover, so
+  // mobile and desktop use identical behavior. Only one exists today
+  // (Systems), but this stays correct if more get added later.
+  var dropdownToggles = document.querySelectorAll(".nav-dropdown-toggle");
+
+  function closeAllDropdowns() {
+    dropdownToggles.forEach(function (btn) {
+      btn.closest(".nav-dropdown").classList.remove("is-open");
+      btn.setAttribute("aria-expanded", "false");
+    });
+  }
+
+  dropdownToggles.forEach(function (btn) {
+    btn.addEventListener("click", function (event) {
+      event.stopPropagation();
+      var dropdown = btn.closest(".nav-dropdown");
+      var wasOpen = dropdown.classList.contains("is-open");
+      closeAllDropdowns();
+      if (!wasOpen) {
+        dropdown.classList.add("is-open");
+        btn.setAttribute("aria-expanded", "true");
+      }
+    });
+  });
+
+  document.addEventListener("click", closeAllDropdowns);
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
+      closeAllDropdowns();
+    }
+  });
+
   var prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var sections = document.querySelectorAll("main .band");
 
